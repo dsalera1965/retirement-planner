@@ -102,7 +102,7 @@ def setup():
         return redirect(url_for('index'))
 
     profile = Profile.query.first()
-    return render_template('setup.html', profile=profile)
+    return render_template('setup.html', profile=profile, max=max, min=min)
 
 
 @app.route('/reset', methods=['POST'])
