@@ -35,34 +35,76 @@
               <span>Current Savings</span>
               <input name="current_savings" type="number" step="1000" value="{{ profile.current_savings if profile else 150000 }}" required />
             </label>
-            <label>
-              <span>Monthly Income</span>
-              <input name="monthly_income" type="number" step="100" value="{{ profile.monthly_income if profile else 6500 }}" required />
-            </label>
-            <label>
-              <span>Monthly Expenses</span>
-              <input name="monthly_expenses" type="number" step="100" value="{{ profile.monthly_expenses if profile else 3500 }}" required />
-            </label>
-            <label>
-              <span>Monthly Investment</span>
-              <input name="monthly_investment" type="number" step="100" value="{{ profile.monthly_investment if profile else 1200 }}" required />
-            </label>
-            <label>
-              <span>Current Debt</span>
-              <input name="current_debt" type="number" step="1000" value="{{ profile.current_debt if profile else 25000 }}" required />
-            </label>
-            <label>
-              <span>Expected Return (%)</span>
-              <input name="annual_return" type="number" step="0.1" value="{{ (profile.annual_return * 100) if profile else 7 }}" required />
-            </label>
-            <label>
-              <span>Inflation (%)</span>
-              <input name="inflation" type="number" step="0.1" value="{{ (profile.inflation * 100) if profile else 3 }}" required />
-            </label>
-            <label>
-              <span>Desired Annual Income</span>
-              <input name="desired_income" type="number" step="100" value="{{ profile.desired_income if profile else 5000 }}" required />
-            </label>
+          </div>
+
+          <div class="section-block">
+            <h2>Current Income</h2>
+            <div class="field-grid">
+              <label>
+                <span>Wages</span>
+                <input name="monthly_wages" type="number" step="100" value="{{ profile.monthly_wages if profile else 6500 }}" required />
+              </label>
+              <label>
+                <span>Bonus</span>
+                <input name="monthly_bonus" type="number" step="100" value="{{ profile.monthly_bonus if profile else 1200 }}" />
+              </label>
+              <label>
+                <span>Monthly Expenses</span>
+                <input name="monthly_expenses" type="number" step="100" value="{{ profile.monthly_expenses if profile else 3500 }}" required />
+              </label>
+              <label>
+                <span>Monthly Investment</span>
+                <input name="monthly_investment" type="number" step="100" value="{{ profile.monthly_investment if profile else 1200 }}" required />
+              </label>
+              <label>
+                <span>Current Debt</span>
+                <input name="current_debt" type="number" step="1000" value="{{ profile.current_debt if profile else 25000 }}" required />
+              </label>
+            </div>
+          </div>
+
+          <div class="section-block">
+            <h2>Retirement Income</h2>
+            <div class="field-grid">
+              <label>
+                <span>Annual Pension</span>
+                <input name="annual_pension" type="number" step="100" value="{{ profile.annual_pension if profile else 24000 }}" />
+              </label>
+              <label>
+                <span>Social Security</span>
+                <input name="annual_social_security" type="number" step="100" value="{{ profile.annual_social_security if profile else 28000 }}" />
+              </label>
+              <label>
+                <span>IRA Withdrawal</span>
+                <input name="annual_ira_withdrawal" type="number" step="100" value="{{ profile.annual_ira_withdrawal if profile else 12000 }}" />
+              </label>
+              <label>
+                <span>Rental Income</span>
+                <input name="annual_rental_income" type="number" step="100" value="{{ profile.annual_rental_income if profile else 6000 }}" />
+              </label>
+              <label>
+                <span>Other Income</span>
+                <input name="annual_other_income" type="number" step="100" value="{{ profile.annual_other_income if profile else 0 }}" />
+              </label>
+            </div>
+          </div>
+
+          <div class="section-block">
+            <h2>Plan Assumptions</h2>
+            <div class="field-grid">
+              <label>
+                <span>Expected Return (%)</span>
+                <input name="annual_return" type="number" step="0.1" value="{{ (profile.annual_return * 100) if profile else 7 }}" required />
+              </label>
+              <label>
+                <span>Inflation (%)</span>
+                <input name="inflation" type="number" step="0.1" value="{{ (profile.inflation * 100) if profile else 3 }}" required />
+              </label>
+              <label>
+                <span>Desired Annual Income</span>
+                <input name="desired_income" type="number" step="100" value="{{ profile.desired_income if profile else 5000 }}" required />
+              </label>
+            </div>
           </div>
 
           <div class="form-actions">
@@ -74,101 +116,3 @@
     </div>
   </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
