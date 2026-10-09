@@ -1,7 +1,6 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-import os
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'dev-secret-key'
@@ -9,6 +8,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///retirement.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
+
 
 class Profile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -23,22 +23,34 @@ class Profile(db.Model):
     annual_return = db.Column(db.Float, default=0.07)
     inflation = db.Column(db.Float, default=0.03)
     desired_income = db.Column(db.Float, default=0)
-    # Current work income (pre-retirement)
     monthly_wages = db.Column(db.Float, default=0)
-    # Retirement income sources
     annual_pension = db.Column(db.Float, default=0)
     annual_social_security = db.Column(db.Float, default=0)
     annual_ira_withdrawal = db.Column(db.Float, default=0)
     annual_rental_income = db.Column(db.Float, default=0)
     annual_other_income = db.Column(db.Float, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    debts = db.relationship('Debt', backref='profile', lazy=True, cascade='all, delete-orphan')
+
+
+class Debt(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    profile_id = db.Column(db.Integer, db.ForeignKey('profile.id'), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    debt_type = db.Column(db.String(50), default='Other')
+    balance = db.Column(db.Float, default=0)
+    monthly_payment = db.Column(db.Float, default=0)
+    interest_rate = db.Column(db.Float, default=0)
+    remaining_months = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
 
 with app.app_context():
     db.create_all()
 
     profile = Profile.query.first()
     if not profile:
-        db.session.add(Profile(
+        profile = Profile(
             name='Sample User',
             age=35,
             retirement_age=65,
@@ -56,8 +68,26 @@ with app.app_context():
             annual_ira_withdrawal=12000,
             annual_rental_income=6000,
             annual_other_income=0,
-        ))
+        )
+        db.session.add(profile)
         db.session.commit()
+
+        sample_debts = [
+            Debt(name='Car Loan', debt_type='Car', balance=15000, monthly_payment=450, interest_rate=4.5, remaining_months=36),
+            Debt(name='Credit Card', debt_type='Credit Card', balance=5000, monthly_payment=200, interest_rate=18.0, remaining_months=30),
+            Debt(name='Student Loan', debt_type='Student Loan', balance=45000, monthly_payment=450, interest_rate=5.0, remaining_months=120),
+        ]
+        for debt in sample_debts:
+            profile.debts.append(debt)
+        db.session.commit()
+
+
+def calculate_total_debt(profile):
+    return sum(debt.balance for debt in profile.debts)
+
+
+def calculate_total_monthly_debt_payment(profile):
+    return sum(debt.monthly_payment for debt in profile.debts)
 
 
 def calculate_retirement(profile):
@@ -69,28 +99,26 @@ def calculate_retirement(profile):
         future_value = future_value * (1 + monthly_rate)
         future_value += profile.monthly_investment
 
-    # Calculate retirement income from all sources
     annual_pension = profile.annual_pension or 0
     annual_social_security = profile.annual_social_security or 0
     annual_ira_withdrawal = profile.annual_ira_withdrawal or 0
     annual_rental_income = profile.annual_rental_income or 0
     annual_other_income = profile.annual_other_income or 0
 
-    # Calculate portfolio withdrawal (4% rule)
     portfolio_withdrawal = future_value * 0.04
-
-    # Total retirement income
-    total_retirement_income = (annual_pension + annual_social_security +
-                               annual_ira_withdrawal + annual_rental_income +
-                               annual_other_income + portfolio_withdrawal)
+    total_retirement_income = (
+        annual_pension + annual_social_security + annual_ira_withdrawal + annual_rental_income + annual_other_income + portfolio_withdrawal
+    )
 
     annual_expenses = profile.monthly_expenses * 12
     projected_gap = max(profile.desired_income - total_retirement_income, 0)
 
-    # Current income and expenses
     annual_bonus = (profile.monthly_bonus or 0) * 12
     annual_wages = ((profile.monthly_wages or 0) + (profile.monthly_bonus or 0)) * 12
     annual_gap = max(annual_expenses - annual_wages, 0)
+
+    total_debt = calculate_total_debt(profile)
+    total_monthly_debt_payment = calculate_total_monthly_debt_payment(profile)
 
     return {
         'years_to_retirement': years_to_retirement,
@@ -106,8 +134,10 @@ def calculate_retirement(profile):
         'projected_gap': projected_gap,
         'annual_bonus': annual_bonus,
         'annual_wages': annual_wages,
-        'net_monthly_cashflow': (profile.monthly_wages or 0) - profile.monthly_expenses,
+        'net_monthly_cashflow': (profile.monthly_wages or 0) - profile.monthly_expenses - total_monthly_debt_payment,
         'savings_rate': (profile.monthly_investment / max(profile.monthly_wages or 1, 1)) * 100,
+        'total_debt': total_debt,
+        'total_monthly_debt_payment': total_monthly_debt_payment,
     }
 
 
@@ -116,7 +146,6 @@ def index():
     profile = Profile.query.first()
     if not profile:
         return redirect(url_for('setup'))
-
     data = calculate_retirement(profile)
     return render_template('index.html', profile=profile, data=data, max=max, min=min)
 
@@ -150,9 +179,63 @@ def setup():
     return render_template('setup.html', profile=profile, max=max, min=min)
 
 
+@app.route('/debts')
+def debts():
+    profile = Profile.query.first()
+    if not profile:
+        return redirect(url_for('setup'))
+    data = calculate_retirement(profile)
+    return render_template('debts.html', profile=profile, debts=profile.debts, data=data)
+
+
+@app.route('/debt/add', methods=['GET', 'POST'])
+def add_debt():
+    if request.method == 'POST':
+        profile = Profile.query.first()
+        debt = Debt(
+            profile_id=profile.id,
+            name=request.form['name'],
+            debt_type=request.form['debt_type'],
+            balance=float(request.form['balance']),
+            monthly_payment=float(request.form['monthly_payment']),
+            interest_rate=float(request.form['interest_rate']),
+            remaining_months=int(request.form['remaining_months'])
+        )
+        db.session.add(debt)
+        db.session.commit()
+        return redirect(url_for('debts'))
+
+    return render_template('add_debt.html')
+
+
+@app.route('/debt/<int:debt_id>/edit', methods=['GET', 'POST'])
+def edit_debt(debt_id):
+    debt = Debt.query.get_or_404(debt_id)
+    if request.method == 'POST':
+        debt.name = request.form['name']
+        debt.debt_type = request.form['debt_type']
+        debt.balance = float(request.form['balance'])
+        debt.monthly_payment = float(request.form['monthly_payment'])
+        debt.interest_rate = float(request.form['interest_rate'])
+        debt.remaining_months = int(request.form['remaining_months'])
+        db.session.commit()
+        return redirect(url_for('debts'))
+
+    return render_template('edit_debt.html', debt=debt)
+
+
+@app.route('/debt/<int:debt_id>/delete', methods=['POST'])
+def delete_debt(debt_id):
+    debt = Debt.query.get_or_404(debt_id)
+    db.session.delete(debt)
+    db.session.commit()
+    return redirect(url_for('debts'))
+
+
 @app.route('/reset', methods=['POST'])
 def reset_profile():
     Profile.query.delete()
+    Debt.query.delete()
     db.session.commit()
     return redirect(url_for('setup'))
 
