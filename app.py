@@ -18,6 +18,7 @@ class Profile(db.Model):
     current_savings = db.Column(db.Float, default=0)
     monthly_expenses = db.Column(db.Float, default=0)
     monthly_investment = db.Column(db.Float, default=0)
+    monthly_bonus = db.Column(db.Float, default=0)
     current_debt = db.Column(db.Float, default=0)
     annual_return = db.Column(db.Float, default=0.07)
     inflation = db.Column(db.Float, default=0.03)
@@ -43,6 +44,7 @@ with app.app_context():
             retirement_age=65,
             current_savings=150000,
             monthly_wages=6500,
+            monthly_bonus=1200,
             monthly_expenses=3500,
             monthly_investment=1200,
             current_debt=25000,
@@ -73,20 +75,21 @@ def calculate_retirement(profile):
     annual_ira_withdrawal = profile.annual_ira_withdrawal or 0
     annual_rental_income = profile.annual_rental_income or 0
     annual_other_income = profile.annual_other_income or 0
-    
+
     # Calculate portfolio withdrawal (4% rule)
     portfolio_withdrawal = future_value * 0.04
-    
+
     # Total retirement income
-    total_retirement_income = (annual_pension + annual_social_security + 
-                               annual_ira_withdrawal + annual_rental_income + 
+    total_retirement_income = (annual_pension + annual_social_security +
+                               annual_ira_withdrawal + annual_rental_income +
                                annual_other_income + portfolio_withdrawal)
-    
+
     annual_expenses = profile.monthly_expenses * 12
     projected_gap = max(profile.desired_income - total_retirement_income, 0)
-    
+
     # Current income and expenses
-    annual_wages = (profile.monthly_wages or 0) * 12
+    annual_bonus = (profile.monthly_bonus or 0) * 12
+    annual_wages = ((profile.monthly_wages or 0) + (profile.monthly_bonus or 0)) * 12
     annual_gap = max(annual_expenses - annual_wages, 0)
 
     return {
@@ -101,6 +104,8 @@ def calculate_retirement(profile):
         'total_retirement_income': total_retirement_income,
         'annual_gap': annual_gap,
         'projected_gap': projected_gap,
+        'annual_bonus': annual_bonus,
+        'annual_wages': annual_wages,
         'net_monthly_cashflow': (profile.monthly_wages or 0) - profile.monthly_expenses,
         'savings_rate': (profile.monthly_investment / max(profile.monthly_wages or 1, 1)) * 100,
     }
@@ -125,6 +130,7 @@ def setup():
         profile.retirement_age = int(request.form['retirement_age'])
         profile.current_savings = float(request.form['current_savings'])
         profile.monthly_wages = float(request.form.get('monthly_wages', 0))
+        profile.monthly_bonus = float(request.form.get('monthly_bonus', 0))
         profile.monthly_expenses = float(request.form['monthly_expenses'])
         profile.monthly_investment = float(request.form['monthly_investment'])
         profile.current_debt = float(request.form['current_debt'])
