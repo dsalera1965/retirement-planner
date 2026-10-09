@@ -16,13 +16,20 @@ class Profile(db.Model):
     age = db.Column(db.Integer, nullable=False)
     retirement_age = db.Column(db.Integer, nullable=False)
     current_savings = db.Column(db.Float, default=0)
-    monthly_income = db.Column(db.Float, default=0)
     monthly_expenses = db.Column(db.Float, default=0)
     monthly_investment = db.Column(db.Float, default=0)
     current_debt = db.Column(db.Float, default=0)
     annual_return = db.Column(db.Float, default=0.07)
     inflation = db.Column(db.Float, default=0.03)
     desired_income = db.Column(db.Float, default=0)
+    # Current work income (pre-retirement)
+    monthly_wages = db.Column(db.Float, default=0)
+    # Retirement income sources
+    annual_pension = db.Column(db.Float, default=0)
+    annual_social_security = db.Column(db.Float, default=0)
+    annual_ira_withdrawal = db.Column(db.Float, default=0)
+    annual_rental_income = db.Column(db.Float, default=0)
+    annual_other_income = db.Column(db.Float, default=0)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 with app.app_context():
@@ -34,13 +41,18 @@ with app.app_context():
             age=35,
             retirement_age=65,
             current_savings=150000,
-            monthly_income=6500,
+            monthly_wages=6500,
             monthly_expenses=3500,
             monthly_investment=1200,
             current_debt=25000,
             annual_return=0.07,
             inflation=0.03,
             desired_income=5000,
+            annual_pension=24000,
+            annual_social_security=28000,
+            annual_ira_withdrawal=12000,
+            annual_rental_income=6000,
+            annual_other_income=0,
         ))
         db.session.commit()
 
@@ -54,21 +66,42 @@ def calculate_retirement(profile):
         future_value = future_value * (1 + monthly_rate)
         future_value += profile.monthly_investment
 
-    annual_spending = profile.monthly_expenses * 12
-    annual_income = profile.monthly_income * 12
-    annual_gap = max(annual_spending - annual_income, 0)
-
-    retirement_income = future_value * 0.04
-    projected_gap = max(profile.desired_income - retirement_income, 0)
+    # Calculate retirement income from all sources
+    annual_pension = profile.annual_pension
+    annual_social_security = profile.annual_social_security
+    annual_ira_withdrawal = profile.annual_ira_withdrawal
+    annual_rental_income = profile.annual_rental_income
+    annual_other_income = profile.annual_other_income
+    
+    # Calculate portfolio withdrawal (4% rule)
+    portfolio_withdrawal = future_value * 0.04
+    
+    # Total retirement income
+    total_retirement_income = (annual_pension + annual_social_security + 
+                               annual_ira_withdrawal + annual_rental_income + 
+                               annual_other_income + portfolio_withdrawal)
+    
+    annual_expenses = profile.monthly_expenses * 12
+    projected_gap = max(profile.desired_income - total_retirement_income, 0)
+    
+    # Current income and expenses
+    annual_wages = profile.monthly_wages * 12
+    annual_gap = max(annual_expenses - annual_wages, 0)
 
     return {
         'years_to_retirement': years_to_retirement,
         'projected_savings': future_value,
-        'retirement_income': retirement_income,
+        'portfolio_withdrawal': portfolio_withdrawal,
+        'annual_pension': annual_pension,
+        'annual_social_security': annual_social_security,
+        'annual_ira_withdrawal': annual_ira_withdrawal,
+        'annual_rental_income': annual_rental_income,
+        'annual_other_income': annual_other_income,
+        'total_retirement_income': total_retirement_income,
         'annual_gap': annual_gap,
         'projected_gap': projected_gap,
-        'net_monthly_cashflow': profile.monthly_income - profile.monthly_expenses,
-        'savings_rate': (profile.monthly_investment / max(profile.monthly_income, 1)) * 100,
+        'net_monthly_cashflow': profile.monthly_wages - profile.monthly_expenses,
+        'savings_rate': (profile.monthly_investment / max(profile.monthly_wages, 1)) * 100,
     }
 
 
@@ -90,13 +123,18 @@ def setup():
         profile.age = int(request.form['age'])
         profile.retirement_age = int(request.form['retirement_age'])
         profile.current_savings = float(request.form['current_savings'])
-        profile.monthly_income = float(request.form['monthly_income'])
+        profile.monthly_wages = float(request.form.get('monthly_wages', 0))
         profile.monthly_expenses = float(request.form['monthly_expenses'])
         profile.monthly_investment = float(request.form['monthly_investment'])
         profile.current_debt = float(request.form['current_debt'])
         profile.annual_return = float(request.form['annual_return']) / 100
         profile.inflation = float(request.form['inflation']) / 100
         profile.desired_income = float(request.form['desired_income'])
+        profile.annual_pension = float(request.form.get('annual_pension', 0))
+        profile.annual_social_security = float(request.form.get('annual_social_security', 0))
+        profile.annual_ira_withdrawal = float(request.form.get('annual_ira_withdrawal', 0))
+        profile.annual_rental_income = float(request.form.get('annual_rental_income', 0))
+        profile.annual_other_income = float(request.form.get('annual_other_income', 0))
         db.session.add(profile)
         db.session.commit()
         return redirect(url_for('index'))
