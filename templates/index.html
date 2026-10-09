@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Retirement Planner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark">R</div>
+          <div>
+            <p class="eyebrow">Financial Dashboard</p>
+            <h1>RetireWise</h1>
+          </div>
+        </div>
+
+        <nav class="sidebar-nav">
+          <a href="{{ url_for('index') }}" class="active">Overview</a>
+          <a href="{{ url_for('setup') }}">Profile</a>
+        </nav>
+
+        <form action="{{ url_for('reset_profile') }}" method="post">
+          <button class="ghost-btn" type="submit">Reset Profile</button>
+        </form>
+      </aside>
+
+      <main class="content">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Welcome back</p>
+            <h2>{{ profile.name }}</h2>
+          </div>
+          <a class="primary-btn" href="{{ url_for('setup') }}">Update Plan</a>
+        </header>
+
+        <section class="stats-grid">
+          <div class="stat-card accent">
+            <span>Projected Savings</span>
+            <strong>${{ '%.0f' | format(data.projected_savings) }}</strong>
+            <small>by retirement age</small>
+          </div>
+          <div class="stat-card success">
+            <span>Retirement Income</span>
+            <strong>${{ '%.0f' | format(data.retirement_income) }}</strong>
+            <small>annual target</small>
+          </div>
+          <div class="stat-card warning">
+            <span>Years to Retirement</span>
+            <strong>{{ data.years_to_retirement }}</strong>
+            <small>remaining</small>
+          </div>
+          <div class="stat-card danger">
+            <span>Annual Gap</span>
+            <strong>${{ '%.0f' | format(data.annual_gap) }}</strong>
+            <small>current estimate</small>
+          </div>
+        </section>
+
+        <section class="panel-grid">
+          <div class="panel large">
+            <div class="panel-header">
+              <h3>Retirement Snapshot</h3>
+            </div>
+            <div class="snapshot-list">
+              <div>
+                <span>Age</span>
+                <strong>{{ profile.age }}</strong>
+              </div>
+              <div>
+                <span>Retirement Age</span>
+                <strong>{{ profile.retirement_age }}</strong>
+              </div>
+              <div>
+                <span>Current Savings</span>
+                <strong>${{ '%.0f' | format(profile.current_savings) }}</strong>
+              </div>
+              <div>
+                <span>Monthly Investment</span>
+                <strong>${{ '%.0f' | format(profile.monthly_investment) }}</strong>
+              </div>
+              <div>
+                <span>Current Debt</span>
+                <strong>${{ '%.0f' | format(profile.current_debt) }}</strong>
+              </div>
+              <div>
+                <span>Desired Annual Income</span>
+                <strong>${{ '%.0f' | format(profile.desired_income) }}</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Cashflow</h3>
+            </div>
+            <div class="metric-stack">
+              <div>
+                <label>Income</label>
+                <strong>${{ '%.0f' | format(profile.monthly_income) }}</strong>
+              </div>
+              <div>
+                <label>Expenses</label>
+                <strong>${{ '%.0f' | format(profile.monthly_expenses) }}</strong>
+              </div>
+              <div>
+                <label>Net</label>
+                <strong>${{ '%.0f' | format(data.net_monthly_cashflow) }}</strong>
+              </div>
+              <div>
+                <label>Savings Rate</label>
+                <strong>{{ '%.1f' | format(data.savings_rate) }}%</strong>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h3>Retirement Outlook</h3>
+          </div>
+          <div class="progress-wrap">
+            <div class="progress-meta">
+              <span>Target Progress</span>
+              <strong>{{ '%.1f' | format(min(data.retirement_income / max(profile.desired_income, 1) * 100, 100)) }}%</strong>
+            </div>
+            <div class="progress-bar">
+              <span style="width: {{ min(data.retirement_income / max(profile.desired_income, 1) * 100, 100) }}%"></span>
+            </div>
+          </div>
+          <div class="insight-box">
+            {% if data.projected_gap > 0 %}
+              You are projected to need about ${{ '%.0f' | format(data.projected_gap) }} per year more in retirement income than your current plan will provide.
+            {% else %}
+              Your current plan is on track to cover your target retirement income.
+            {% endif %}
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

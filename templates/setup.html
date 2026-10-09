@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Retirement Planner Setup</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  </head>
+  <body>
+    <div class="setup-shell">
+      <div class="setup-card">
+        <div class="form-header">
+          <p class="eyebrow">Plan Setup</p>
+          <h1>Retirement Profile</h1>
+        </div>
+
+        <form method="post">
+          <div class="field-grid">
+            <label>
+              <span>Name</span>
+              <input name="name" type="text" value="{{ profile.name if profile else '' }}" required />
+            </label>
+            <label>
+              <span>Age</span>
+              <input name="age" type="number" min="18" max="100" value="{{ profile.age if profile else 35 }}" required />
+            </label>
+            <label>
+              <span>Retirement Age</span>
+              <input name="retirement_age" type="number" min="45" max="90" value="{{ profile.retirement_age if profile else 65 }}" required />
+            </label>
+            <label>
+              <span>Current Savings</span>
+              <input name="current_savings" type="number" step="1000" value="{{ profile.current_savings if profile else 150000 }}" required />
+            </label>
+            <label>
+              <span>Monthly Income</span>
+              <input name="monthly_income" type="number" step="100" value="{{ profile.monthly_income if profile else 6500 }}" required />
+            </label>
+            <label>
+              <span>Monthly Expenses</span>
+              <input name="monthly_expenses" type="number" step="100" value="{{ profile.monthly_expenses if profile else 3500 }}" required />
+            </label>
+            <label>
+              <span>Monthly Investment</span>
+              <input name="monthly_investment" type="number" step="100" value="{{ profile.monthly_investment if profile else 1200 }}" required />
+            </label>
+            <label>
+              <span>Current Debt</span>
+              <input name="current_debt" type="number" step="1000" value="{{ profile.current_debt if profile else 25000 }}" required />
+            </label>
+            <label>
+              <span>Expected Return (%)</span>
+              <input name="annual_return" type="number" step="0.1" value="{{ (profile.annual_return * 100) if profile else 7 }}" required />
+            </label>
+            <label>
+              <span>Inflation (%)</span>
+              <input name="inflation" type="number" step="0.1" value="{{ (profile.inflation * 100) if profile else 3 }}" required />
+            </label>
+            <label>
+              <span>Desired Annual Income</span>
+              <input name="desired_income" type="number" step="100" value="{{ profile.desired_income if profile else 5000 }}" required />
+            </label>
+          </div>
+
+          <div class="form-actions">
+            <a class="secondary-btn" href="{{ url_for('index') }}">Cancel</a>
+            <button class="primary-btn" type="submit">Save Plan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
