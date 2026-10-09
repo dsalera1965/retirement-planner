@@ -35,7 +35,8 @@ class Profile(db.Model):
 with app.app_context():
     db.create_all()
 
-    if not Profile.query.first():
+    profile = Profile.query.first()
+    if not profile:
         db.session.add(Profile(
             name='Sample User',
             age=35,
@@ -67,11 +68,11 @@ def calculate_retirement(profile):
         future_value += profile.monthly_investment
 
     # Calculate retirement income from all sources
-    annual_pension = profile.annual_pension
-    annual_social_security = profile.annual_social_security
-    annual_ira_withdrawal = profile.annual_ira_withdrawal
-    annual_rental_income = profile.annual_rental_income
-    annual_other_income = profile.annual_other_income
+    annual_pension = profile.annual_pension or 0
+    annual_social_security = profile.annual_social_security or 0
+    annual_ira_withdrawal = profile.annual_ira_withdrawal or 0
+    annual_rental_income = profile.annual_rental_income or 0
+    annual_other_income = profile.annual_other_income or 0
     
     # Calculate portfolio withdrawal (4% rule)
     portfolio_withdrawal = future_value * 0.04
@@ -85,7 +86,7 @@ def calculate_retirement(profile):
     projected_gap = max(profile.desired_income - total_retirement_income, 0)
     
     # Current income and expenses
-    annual_wages = profile.monthly_wages * 12
+    annual_wages = (profile.monthly_wages or 0) * 12
     annual_gap = max(annual_expenses - annual_wages, 0)
 
     return {
@@ -100,8 +101,8 @@ def calculate_retirement(profile):
         'total_retirement_income': total_retirement_income,
         'annual_gap': annual_gap,
         'projected_gap': projected_gap,
-        'net_monthly_cashflow': profile.monthly_wages - profile.monthly_expenses,
-        'savings_rate': (profile.monthly_investment / max(profile.monthly_wages, 1)) * 100,
+        'net_monthly_cashflow': (profile.monthly_wages or 0) - profile.monthly_expenses,
+        'savings_rate': (profile.monthly_investment / max(profile.monthly_wages or 1, 1)) * 100,
     }
 
 
