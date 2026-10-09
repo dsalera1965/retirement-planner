@@ -47,7 +47,7 @@
           </div>
           <div class="stat-card success">
             <span>Retirement Income</span>
-            <strong>${{ '%.0f' | format(data.retirement_income) }}</strong>
+            <strong>${{ '%.0f' | format(data.total_retirement_income) }}</strong>
             <small>annual target</small>
           </div>
           <div class="stat-card warning">
@@ -102,7 +102,7 @@
             <div class="metric-stack">
               <div>
                 <label>Income</label>
-                <strong>${{ '%.0f' | format(profile.monthly_income) }}</strong>
+                <strong>${{ '%.0f' | format(profile.monthly_wages) }}</strong>
               </div>
               <div>
                 <label>Expenses</label>
@@ -127,10 +127,10 @@
           <div class="progress-wrap">
             <div class="progress-meta">
               <span>Target Progress</span>
-              <strong>{{ '%.1f' | format(min(data.retirement_income / max(profile.desired_income, 1) * 100, 100)) }}%</strong>
+              <strong>{{ '%.1f' | format(min(data.total_retirement_income / max(profile.desired_income, 1) * 100, 100)) }}%</strong>
             </div>
             <div class="progress-bar">
-              <span style="width: {{ min(data.retirement_income / max(profile.desired_income, 1) * 100, 100) }}%"></span>
+              <span style="width: {{ min(data.total_retirement_income / max(profile.desired_income, 1) * 100, 100) }}%"></span>
             </div>
           </div>
           <div class="insight-box">
@@ -145,61 +145,3 @@
     </div>
   </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
